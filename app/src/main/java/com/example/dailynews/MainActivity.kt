@@ -13,9 +13,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             DailyNewsTheme {
 
-                }
             }
         }
     }
 }
+
 
