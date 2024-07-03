@@ -1,6 +1,5 @@
 package com.example.dailynews.network
 
-import com.example.dailynews.BuildConfig
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
