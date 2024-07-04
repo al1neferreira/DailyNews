@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,8 +14,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,11 +35,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
+import com.example.dailynews.model.News
+import com.example.dailynews.model.NewsResults
 import com.example.dailynews.ui.theme.BlackTextColor
 import com.example.dailynews.ui.theme.Blue
 import com.example.dailynews.ui.theme.DailyNewsTheme
@@ -62,6 +71,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DailyNewsTheme {
+
             }
         }
     }
@@ -69,8 +79,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun NewsScreen(
+    news: News?,
     viewModel: NewsViewModel,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -79,7 +91,12 @@ fun NewsScreen(
         Header()
         Spacer(modifier = modifier.height(15.dp))
         SearchBar()
+        Spacer(modifier = modifier.height(20.dp))
         SuggestionRow(suggestion = SuggestionList.list, viewModel = viewModel)
+        Spacer(modifier = modifier.height(12.dp))
+        if (news != null) {
+            NewsSession(news = news.results)
+        }
     }
 }
 
@@ -131,6 +148,63 @@ fun SearchBar(modifier: Modifier = Modifier) {
                 }
             }
         )
+    }
+}
+
+@Composable
+fun NewsSession(
+    news: List<NewsResults>
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        items(news) { currentNews ->
+            NewsSessionItem(currentNews)
+        }
+    }
+}
+
+@Composable
+fun NewsSessionItem(
+    newsItem: NewsResults
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(model = newsItem.media[0].metadata[1].url),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(110.dp)
+                .clip(RoundedCornerShape(16.dp))
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Column(
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+
+        ) {
+            Text(
+                newsItem.section,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                color = GrayTextColor
+            )
+            Text(
+                newsItem.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = BlackTextColor
+            )
+            Text(
+                newsItem.publishedDate,
+                fontSize = 12.sp,
+                color = GrayTextColor
+            )
+        }
     }
 }
 
