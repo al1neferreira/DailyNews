@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,16 +14,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,10 +40,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dailynews.ui.theme.BlackTextColor
+import com.example.dailynews.ui.theme.Blue
 import com.example.dailynews.ui.theme.DailyNewsTheme
 import com.example.dailynews.ui.theme.Gray
 import com.example.dailynews.ui.theme.GrayTextColor
 import com.example.dailynews.ui.theme.White
+import com.example.dailynews.viewModels.NewsViewModel
 
 data class Suggestion(val title: String = "", var isFocused: Boolean = false)
 object SuggestionList {
@@ -58,14 +65,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DailyNewsTheme {
-
             }
         }
     }
 }
 
 @Composable
-fun NewsScreen(modifier: Modifier = Modifier) {
+fun NewsScreen(
+    viewModel: NewsViewModel,
+    modifier: Modifier = Modifier) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -74,6 +82,7 @@ fun NewsScreen(modifier: Modifier = Modifier) {
         Header()
         Spacer(modifier = modifier.height(15.dp))
         SearchBar()
+        SuggestionRow(suggestion = SuggestionList.list, viewModel = viewModel)
     }
 }
 
@@ -116,7 +125,8 @@ fun SearchBar(modifier: Modifier = Modifier) {
             modifier = modifier.weight(1f),
             placeholder = {
                 Row {
-                    Icon(imageVector = Icons.Filled.Search,
+                    Icon(
+                        imageVector = Icons.Filled.Search,
                         contentDescription = "Search Icon"
                     )
                     Spacer(modifier = modifier.width(10.dp))
@@ -127,18 +137,49 @@ fun SearchBar(modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+var selectedSuggestionIndex by mutableStateOf(0)
+
 @Composable
-private fun NewsScreenPreview() {
-    DailyNewsTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = White
-        ) {
-            NewsScreen()
+fun SuggestionRow(
+    suggestion: List<Suggestion>,
+    viewModel: NewsViewModel
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        itemsIndexed(suggestion) { index, sug ->
+            SuggestionItem(
+                suggestion = sug,
+                isFocused = index == selectedSuggestionIndex,
+                onClick = {
+                    selectedSuggestionIndex = index
+                    viewModel.fetchNews()
+                }
+            )
         }
     }
 }
+
+@Composable
+fun SuggestionItem(
+    suggestion: Suggestion,
+    isFocused: Boolean,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = { onClick() },
+        shape = RoundedCornerShape(40.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isFocused) Blue else Gray
+        )
+    ) {
+        Text(
+            text = suggestion.title,
+            color = if (isFocused) White else GrayTextColor
+        )
+    }
+}
+
 
 
 
