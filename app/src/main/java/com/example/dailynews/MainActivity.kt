@@ -101,7 +101,7 @@ fun NewsScreen(
 }
 
 @Composable
-fun Header(modifier: Modifier = Modifier) {
+fun Header() {
     Text(
         text = "Discover",
         fontSize = 32.sp,
